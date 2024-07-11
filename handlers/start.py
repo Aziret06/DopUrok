@@ -6,6 +6,7 @@ start_router = Router()
 
 @start_router.message(Command('start'))
 async def start_handler(message: types.Message):
+    users = {}
     kb = types.InlineKeyboardMarkup(
         inline_keyboard=[
             [
@@ -15,6 +16,9 @@ async def start_handler(message: types.Message):
             [
                 types.InlineKeyboardButton(text='Наш адрес', url='https://2gis.kg'),
                 types.InlineKeyboardButton(text='Вакансии', callback_data='jobs')
+            ],
+            [
+                types.InlineKeyboardButton(text='Оставьте отзыв', callback_data='feedback')
             ]
         ]
     )
@@ -29,8 +33,12 @@ async def about_us_handler(callback: types.CallbackQuery):
 
 
 @start_router.callback_query(F.data == 'jobs')
-async def about_us_handler(callback: types.CallbackQuery):
+async def jobs_handler(callback: types.CallbackQuery):
     await callback.answer()
     await callback.message.answer('Требуется повар со стажем работы не менее 3 лет.'
                                   '\nТребуются посудомойщики в возрасте от 18 лет.'
                                   '\nТребуются официанты, стаж необязателен, в возрасте от 18 лет.')
+
+
+
+

@@ -42,6 +42,7 @@ async def process_phone_number(message: types.Message, state: FSMContext):
 
 @review_dialog_router.message(RestaurantReview.visit_date)
 async def process_visit_date(message: types.Message, state: FSMContext):
+
     kb = types.ReplyKeyboardMarkup(
         keyboard=[
             [
@@ -69,14 +70,20 @@ async def process_visit_date(message: types.Message, state: FSMContext):
         await message.answer('Вводите только числа!')
         return
 
+    visit_date = int(visit_date)
+    if visit_date < 1 or visit_date > 31:
+        await message.answer('Нет такого числа в месяце')
+        return
+
     await state.set_state(RestaurantReview.food_rating)
     await message.answer('Оцените качество еды', reply_markup=kb)
 
 
 @review_dialog_router.message(RestaurantReview.food_rating)
 async def process_food_rating(message: types.Message, state: FSMContext):
+    kb = types.ReplyKeyboardRemove()
     await state.set_state(RestaurantReview.cleanliness_rating)
-    await message.answer('Оцените чистоту ресторана (от 1 до 10)')
+    await message.answer('Оцените чистоту ресторана (от 1 до 10)', reply_markup=kb)
 
 
 @review_dialog_router.message(RestaurantReview.cleanliness_rating)

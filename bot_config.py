@@ -4,4 +4,5 @@ from os import getenv
 
 load_dotenv()
 bot = Bot(token=getenv('MY_TOKEN'))
+media = getenv('media')
 dp = Dispatcher()
