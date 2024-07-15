@@ -1,7 +1,8 @@
 from aiogram import Router, types, F
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
-from bot_config import bot
+
+from bot_config import bot, database
 
 review_dialog_router = Router()
 
@@ -24,6 +25,7 @@ async def feedback_handler(callback: types.CallbackQuery, state: FSMContext):
 
 @review_dialog_router.message(RestaurantReview.name)
 async def process_name(message: types.Message, state: FSMContext):
+    await state.update_data(name=message.text)
     await state.set_state(RestaurantReview.phone_number)
     await message.answer('Ваш номер телефона')
 
@@ -36,60 +38,57 @@ async def process_phone_number(message: types.Message, state: FSMContext):
         await message.answer('Вводите только числа!')
         return
 
+    await state.update_data(phone_number=message.text)
     await state.set_state(RestaurantReview.visit_date)
-    await message.answer('Дата вашего визита (число)')
+    await message.answer('Дата вашего визита (ДД-ММ-ГГГГ)')
 
 
 @review_dialog_router.message(RestaurantReview.visit_date)
 async def process_visit_date(message: types.Message, state: FSMContext):
+    #
+    # kb = types.ReplyKeyboardMarkup(
+    #     keyboard=[
+    #         [
+    #             types.KeyboardButton(text='Замечательно')
+    #         ],
+    #         [
+    #             types.KeyboardButton(text='Хорошо')
+    #         ],
+    #         [
+    #             types.KeyboardButton(text='Удовлетворительно')
+    #         ],
+    #         [
+    #             types.KeyboardButton(text='Так себе')
+    #         ],
+    #         [
+    #             types.KeyboardButton(text='Отвратительно')
+    #         ]
+    #     ],
+    #     resize_keyboard=True
+    # )
 
-    kb = types.ReplyKeyboardMarkup(
-        keyboard=[
-            [
-                types.KeyboardButton(text='Замечательно')
-            ],
-            [
-                types.KeyboardButton(text='Хорошо')
-            ],
-            [
-                types.KeyboardButton(text='Удовлетворительно')
-            ],
-            [
-                types.KeyboardButton(text='Так себе')
-            ],
-            [
-                types.KeyboardButton(text='Отвратительно')
-            ]
-        ],
-        resize_keyboard=True
-    )
-
-    visit_date = message.text
-
-    if not visit_date.isdigit():
-        await message.answer('Вводите только числа!')
-        return
-
-    visit_date = int(visit_date)
-    if visit_date < 1 or visit_date > 31:
-        await message.answer('Нет такого числа в месяце')
-        return
-
+    await state.update_data(visit_date=message.text)
     await state.set_state(RestaurantReview.food_rating)
-    await message.answer('Оцените качество еды', reply_markup=kb)
+    await message.answer('Оцените качество еды (от 1 до 5)')  # reply_markup=kb
 
 
 @review_dialog_router.message(RestaurantReview.food_rating)
 async def process_food_rating(message: types.Message, state: FSMContext):
-    kb = types.ReplyKeyboardRemove()
+    # kb = types.ReplyKeyboardRemove()
+
+    food_rating = message.text
+    if not food_rating.isdigit():
+        await message.answer('Вводите только числа!')
+        return
+
+    await state.update_data(food_rating=message.text)
     await state.set_state(RestaurantReview.cleanliness_rating)
-    await message.answer('Оцените чистоту ресторана (от 1 до 10)', reply_markup=kb)
+    await message.answer('Оцените чистоту ресторана (от 1 до 10)')  # reply_markup=kb
 
 
 @review_dialog_router.message(RestaurantReview.cleanliness_rating)
 async def process_cleanliness_rating(message: types.Message, state: FSMContext):
     cleanliness_rating = message.text
-
     if not cleanliness_rating.isdigit():
         await message.answer('Вводите только числа!')
         return
@@ -99,11 +98,19 @@ async def process_cleanliness_rating(message: types.Message, state: FSMContext):
         await message.answer('От 1 до 10!')
         return
 
+    await state.update_data(cleanliness_rating=message.text)
     await state.set_state(RestaurantReview.extra_comments)
     await message.answer('Дополнительный комментарий')
 
 
 @review_dialog_router.message(RestaurantReview.extra_comments)
 async def process_extra_comments(message: types.Message, state: FSMContext):
+    await state.update_data(extra_comments=message.text)
+    data = await state.get_data()
+    database.execute('''
+                INSERT INTO review_results (name, phone_number, visit_date, food_rating, cleanliness_rating, extra_comments)
+                VALUES (?, ?, ?, ?, ?, ?)
+    ''', (data['name'], data['phone_number'], data['visit_date'], data['food_rating'], data['cleanliness_rating'],
+          data['extra_comments']))
     await state.clear()
     await message.answer('Спасибо за ваш отзыв!')
