@@ -11,8 +11,21 @@ class Database:
         # контекстный менеджер
         with sqlite3.connect(self.path) as connect:
             connect.execute(Queries.CREATE_REVIEW_DIALOG_TABLE)
+            connect.execute(Queries.DROP_DISHES_CATEGORY_TABLE)
+            connect.execute(Queries.CREATE_DISHES_CATEGORY_TABLE)
+            connect.execute(Queries.POPULATE_DISHES_CATEGORY_TABLE)
+            connect.execute(Queries.DROP_DISHES_TABLE)
+            connect.execute(Queries.CREATE_DISHES_TABLE)
+            connect.execute(Queries.POPULATE_DISHES_TABLE)
+
+            connect.commit()
 
     def execute(self, query: str, params: tuple = None):
         with sqlite3.connect(self.path) as connect:
             connect.execute(query, params)
 
+    def fetch(self, query: str, params: tuple = None, fetchmany: bool = True):
+        with sqlite3.connect(self.path) as connect:
+            result = connect.execute(query, params)
+
+            return result.fetchall()
