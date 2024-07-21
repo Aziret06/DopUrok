@@ -45,45 +45,45 @@ async def process_phone_number(message: types.Message, state: FSMContext):
 
 @review_dialog_router.message(RestaurantReview.visit_date)
 async def process_visit_date(message: types.Message, state: FSMContext):
-    #
-    # kb = types.ReplyKeyboardMarkup(
-    #     keyboard=[
-    #         [
-    #             types.KeyboardButton(text='Замечательно')
-    #         ],
-    #         [
-    #             types.KeyboardButton(text='Хорошо')
-    #         ],
-    #         [
-    #             types.KeyboardButton(text='Удовлетворительно')
-    #         ],
-    #         [
-    #             types.KeyboardButton(text='Так себе')
-    #         ],
-    #         [
-    #             types.KeyboardButton(text='Отвратительно')
-    #         ]
-    #     ],
-    #     resize_keyboard=True
-    # )
+
+    kb = types.ReplyKeyboardMarkup(
+        keyboard=[
+            [
+                types.KeyboardButton(text='Замечательно', request=5)
+            ],
+            [
+                types.KeyboardButton(text='Хорошо', request=4)
+            ],
+            [
+                types.KeyboardButton(text='Удовлетворительно', request=3)
+            ],
+            [
+                types.KeyboardButton(text='Так себе', request=2)
+            ],
+            [
+                types.KeyboardButton(text='Отвратительно', request=1)
+            ]
+        ],
+        resize_keyboard=True
+    )
 
     await state.update_data(visit_date=message.text)
     await state.set_state(RestaurantReview.food_rating)
-    await message.answer('Оцените качество еды (от 1 до 5)')  # reply_markup=kb
+    await message.answer('Оцените качество еды', reply_markup=kb)
 
 
 @review_dialog_router.message(RestaurantReview.food_rating)
 async def process_food_rating(message: types.Message, state: FSMContext):
-    # kb = types.ReplyKeyboardRemove()
+    kb = types.ReplyKeyboardRemove()
 
-    food_rating = message.text
-    if not food_rating.isdigit():
-        await message.answer('Вводите только числа!')
-        return
+    ratings = {'Замечательно': 5, 'Хорошо': 4, 'Удовлетворительно': 3, 'Так себе': 2, 'Отвратительно': 1}
+    try:
+        await state.update_data(food_rating=ratings[message.text])
+    except KeyError:
+        pass
 
-    await state.update_data(food_rating=message.text)
     await state.set_state(RestaurantReview.cleanliness_rating)
-    await message.answer('Оцените чистоту ресторана (от 1 до 10)')  # reply_markup=kb
+    await message.answer('Оцените чистоту ресторана (от 1 до 10)', reply_markup=kb)
 
 
 @review_dialog_router.message(RestaurantReview.cleanliness_rating)
