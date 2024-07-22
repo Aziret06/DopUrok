@@ -74,16 +74,17 @@ async def process_visit_date(message: types.Message, state: FSMContext):
 
 @review_dialog_router.message(RestaurantReview.food_rating)
 async def process_food_rating(message: types.Message, state: FSMContext):
-    kb = types.ReplyKeyboardRemove()
 
     ratings = {'Замечательно': 5, 'Хорошо': 4, 'Удовлетворительно': 3, 'Так себе': 2, 'Отвратительно': 1}
+    
+    kb = types.ReplyKeyboardRemove()
     try:
         await state.update_data(food_rating=ratings[message.text])
+        await state.set_state(RestaurantReview.cleanliness_rating)
+        await message.answer('Оцените чистоту ресторана (от 1 до 10)', reply_markup=kb)
     except KeyError:
-        pass
-
-    await state.set_state(RestaurantReview.cleanliness_rating)
-    await message.answer('Оцените чистоту ресторана (от 1 до 10)', reply_markup=kb)
+        await message.answer('pres only buttons!!')
+        await state.set_state(RestaurantReview.food_rating)
 
 
 @review_dialog_router.message(RestaurantReview.cleanliness_rating)
