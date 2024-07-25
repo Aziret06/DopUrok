@@ -34,15 +34,16 @@ class Queries:
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT,
         price INTEGER,
+        cover TEXT,
         category_id INTEGER,
         FOREIGN KEY (category_id) REFERENCES dishes_category(id)
         )
     '''
 
     POPULATE_DISHES_TABLE = '''
-    INSERT INTO dishes(name, price, category_id) VALUES 
-    ('Босо лагман', 140, 2),
-    ('Гуйру лагман', 130, 2),
-    ('Пельмени', 100, 3),
-    ('Блины со сметаной', 60, 1)
+    INSERT INTO dishes(name, price, cover, category_id) VALUES 
+    ('Босо лагман', 140, 'media/for_menu/boso_lagman.jpg', 2),
+    ('Гуйру лагман', 130, 'media/for_menu/guyru_lagman.jpg', 2),
+    ('Пельмени', 100, 'media/for_menu/pelmeni.jpg', 3),
+    ('Блины со сметаной', 60, 'media/for_menu/bliny.jpg', 1)
     '''

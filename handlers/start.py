@@ -10,6 +10,9 @@ async def start_handler(message: types.Message):
     kb = types.InlineKeyboardMarkup(
         inline_keyboard=[
             [
+                types.InlineKeyboardButton(text='Аренда квартир', callback_data='houses')
+            ],
+            [
                 types.InlineKeyboardButton(text='О нас', callback_data='about_us'),
                 types.InlineKeyboardButton(text='Наш инстаграм', url='https://instagram.com')
             ],

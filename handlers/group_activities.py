@@ -1,5 +1,4 @@
 from aiogram import Router, types
-from aiogram.filters.command import Command
 
 from datetime import timedelta
 
