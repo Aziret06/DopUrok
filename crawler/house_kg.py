@@ -11,10 +11,10 @@ class HouseParser:
         response = requests.get(HouseParser.MAIN_URL)
         print(response.status_code)
 
-        self.psge = response.text
+        self.page = response.text
 
     def get_flat_links(self):
-        selector = Selector(text=self.psge)
+        selector = Selector(text=self.page)
         links = selector.css('div.left-image a::attr(href)').getall()
         links = list(map(lambda l: f'{HouseParser.BASE_URL}{l}', links))
         pprint(links)
